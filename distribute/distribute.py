@@ -46,8 +46,16 @@ def add_user():
     db.execute('insert into persons (name, address, skills) values (?, ?, ?)',
             [request.form['name'], request.form['address'], request.form['skills']])
     db.commit()
-    print("A user was added")
-    return "A user was added"
+    print("A user was added\n")
+    return "A user was added\n"
+
+@app.route('/del_user', methods=['POST'])
+def del_user():
+    db = get_db()
+    db.execute('delete from persons where name=?', (request.form['name'],))
+    db.commit()
+    print("A user was deleted\n")
+    return "A user was deleted\n"
 
 @app.route('/distribute/<string:problem>')
 def distribute(problem):
