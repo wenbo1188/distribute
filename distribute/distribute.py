@@ -57,6 +57,11 @@ def del_user():
     print("A user was deleted\n")
     return "A user was deleted\n"
 
+@app.route('/clear')
+def clear():
+    init_db()
+    print("User information cleared\n")
+
 @app.route('/distribute/<string:problem>')
 def distribute(problem):
     db = get_db()
