@@ -1,5 +1,7 @@
 import os
 import sqlite3
+import json
+from server_comm import myCliSocket
 from flask import Flask, request, session, g, redirect, url_for, abort
 
 app = Flask(__name__)
@@ -11,6 +13,9 @@ app.config.update(dict(
     USERNAME='admin',
     PASSWORD='default'
 ))
+
+manager_ip = "192.168.1.1"
+manager_port = 5050
 
 app.config.from_envvar('DISTRIBUTE_SETTINGS', silent=True)
 
@@ -35,6 +40,47 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
+def get_resource():
+    return False
+
+def update_to_manager(operation, name, address=None, skills=None):
+    if operation == "ADD":
+        data = {"type":"ADD", "inform":{"name":name, "address":address, "skills":skills}}
+        data_string = json.dumps(data)
+        myClient = myCliSocket(manager_ip, manager_port)
+        socket = myClient.createCliSocket()
+        myClient.startCliSocket(socket, 1024, data_string)
+        myClient.destroyCliSocket()
+        return True
+    if operation == "DEL":
+        data = {"type":"DEL", "inform":{"name":name}} 
+        data_string = json.dumps(data)
+        myClient = myCliSocket(manager_ip, manager_port)
+        socket = myClient.createCliSocket()
+        myClient.startCliSocket(socket, 1024, data_string)
+        myClient.destroyCliSocket()
+        return True
+    if operation == "UPDATE":
+        data = {"type":"UPDATE", "inform":{"name":name, "address":address, "skills":skills}} 
+        data_string = json.dumps(data)
+        myClient = myCliSocket(manager_ip, manager_port)
+        socket = myClient.createCliSocket()
+        myClient.startCliSocket(socket, 1024, data_string)
+        myClient.destroyCliSocket()
+        return True
+    return False
+
+def request_to_manager(problem):
+    data = {"type":"REQUEST", "inform":{"problem":problem}}
+    data_string = json.dumps(data)
+    myClient = myCliSocket(manager_ip, manager_port)
+    socket = myClient.createCliSocket()
+    myClient.startCliSocket(socket, 1024, data_string)
+    myClient.destroyCliSocket()
+
+def solved_local(result):
+    return False
+
 @app.teardown_appcontext
 def close_db(error):
     if hasattr(g, 'sqlite_db'):
@@ -46,16 +92,21 @@ def add_user():
     db.execute('insert into persons (name, address, skills) values (?, ?, ?)',
             [request.form['name'], request.form['address'], request.form['skills']])
     db.commit()
-    print("A user was added\n")
-    return "A user was added\n"
+    print("A user was added to local\n")
+    if update_to_manager("ADD", request.form['name'], request.form['address'], request.form['skills']):
+        print("A user was added to manager\n")
+
+    return "200|A user was added"
 
 @app.route('/del_user', methods=['POST'])
 def del_user():
     db = get_db()
     db.execute('delete from persons where name=?', (request.form['name'],))
     db.commit()
-    print("A user was deleted\n")
-    return "A user was deleted\n"
+    print("A user was deleted local\n")
+    if update_to_manager("DEL", request.form['name']):
+        print("A user was deleted to manager\n")
+    return "200|A user was deleted"
 
 @app.route('/clear')
 def clear():
@@ -77,7 +128,8 @@ def distribute(problem):
             break
     
     if flag == 0:
-        return ("Nobody is good at the problem\n")
+        request_to_manager(problem)
+        return ("Requesting to manager server\n")
     else:
         return "Problem %s was distributed!\n" %problem
 
