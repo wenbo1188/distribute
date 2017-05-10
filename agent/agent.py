@@ -67,7 +67,7 @@ def getRemoteIp(managerips, localip):
         socket = myClient.createCliSocket()
         response = myClient.startCliSocket(socket, 1024, data_string)
         if response != None:
-            for item in json.loads(response):
+              for item in json.loads(response):
                 remote_distribute_ips.append(item)
         myClient.destroyCliSocket()
 

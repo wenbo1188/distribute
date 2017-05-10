@@ -11,15 +11,16 @@ class dealServer:
         self.numOfContainer = numOfContainer
         self.imageName = imageName # i.e. "wenbo1188/myagent:3.0"
         self.managerip = managerip
-        if (!self.signUp()):
-            print("successfully initialise deal server\n")
+        if not self.signUp():
+            print("successfully initialise deal server")
+            print("serving at ip %s" % self.ip)
         else:
             print("fail to initialise deal server\n")
 
     def __del__(self):
         self.socket.close()
         self.dealWithUnfinishedContainer()
-        if (!self.signOut()):
+        if not self.signOut():
            print("successfully destroy deal server\n")
         else:
             print("fail to destroy deal server\n")
@@ -35,7 +36,7 @@ class dealServer:
         data_string = json.dumps(data)
         ip_address = self.managerip
         port = 5050
-        mycliserver = myCliSocket(self.ip, self.port)
+        mycliserver = myCliSocket(ip_address, port)
         socket = mycliserver.createCliSocket()
         response = mycliserver.startCliSocket(socket, 1024, data_string)
         mycliserver.destroyCliSocket()
@@ -51,7 +52,7 @@ class dealServer:
         data_string = json.dumps(data)
         ip_address = self.managerip
         port = 5050
-        mycliserver = myCliSocket(self.ip, self.port)
+        mycliserver = myCliSocket(ip_address, port)
         socket = mycliserver.createCliSocket()
         response = mycliserver.startCliSocket(socket, 1024, data_string)
         mycliserver.destroyCliSocket()
@@ -118,7 +119,7 @@ class dealServer:
 def main():
     parser = argparse.ArgumentParser(description='parser for deal server')
     parser.add_argument('--ip', help='the ip of this node')
-    parser.add_argument('--port', help='the port num of socket this node is using')
+    parser.add_argument('--port', type=int, help='the port num of socket this node is using for service support --can\'t use 5050')
     parser.add_argument('--imageName', help='the version of image: i.e. wenbo1188/myagent:#')
     parser.add_argument('--managerip', help='the manager server ip of this node')
     args = parser.parse_args()

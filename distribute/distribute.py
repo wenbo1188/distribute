@@ -18,7 +18,7 @@ app.config.update(dict(
     PASSWORD='default'
 ))
 
-manager_ip = "192.168.1.2"
+manager_ip = "59.78.25.163"
 manager_port = 5050
 
 app.config.from_envvar('DISTRIBUTE_SETTINGS', silent=True)
@@ -134,18 +134,10 @@ def distribute(problem):
     db = get_db()
     res = db.execute('select name, address from persons where skills=?', problem)
     listres = res.fetchall()
-    '''
-    flag = 0 
-    for item in listres:
-        if item != None:
-            print("the problem %s is distributed to %s, address is %s\n" % (problem, item[0], item[1])) 
-            flag = 1
-        else:
-            break
-    '''
+
     if listres != None:
         for item in listres:
             print("the problem %s is distributed to %s, address is %s\n" % (problem, item[0], item[1]))
             return "problem " + item[0] + " " + item[1]
     else:
-        return "None"
+        return "No one can solve the problem"

@@ -104,6 +104,7 @@ class manageServer:
             except:
                 print("Still exist ip %s\n" % from_ip)
             self.localIp = list(set(self.localIp))
+            socket.send("200 OK!")
         if message["type"] == "BYE":
             try:
                 self.localIp.remove(from_ip)
@@ -111,6 +112,7 @@ class manageServer:
             except:
                 print("Do not have ip %s\n" % from_ip)
             self.localIp = list(set(self.localIp))
+            socket.send("200 OK!")
         if message["type"] == "FIND":
             stringData = json.dumps(self.localIp)
             for item in self.localIp:
